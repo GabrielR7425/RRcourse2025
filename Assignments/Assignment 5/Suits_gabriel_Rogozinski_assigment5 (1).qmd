@@ -1,0 +1,70 @@
+---
+title: "TV Show Report: *Suits*"
+author: "Gabriel Rogozinski"
+format: 
+  html:
+    theme: superhero
+    toc: true
+    toc-depth: 2
+    smooth-scroll: true
+    code-fold: show
+    code-summary: "Show / hide Python code"
+  docx: default
+execute: 
+  echo: true
+  warning: false
+  message: false
+---
+:::{.panel-tabset}
+
+# Overview
+
+*Suits* is an American legal drama television series that aired on USA Network from **June 23, 2011** to **September 25, 2019**. Created by **Aaron Korsh**, the show follows college dropout Mike Ross, who begins working as a law associate for Harvey Specter despite never having attended law school.
+
+The series stars **Gabriel Macht**, **Patrick J. Adams**, **Meghan Markle**, and others. It was praised for its witty dialogue, character chemistry, and sharp visual style.
+
+![](https://upload.wikimedia.org/wikipedia/en/8/8c/Suits_season_1_title_card.jpg)
+
+*Figure: Title card from Season 1 of Suits*
+
+```{r}
+# Load libraries
+library(tibble)
+library(dplyr)
+library(ggplot2)
+
+# Season-wise average US viewership (in millions)
+viewership <- tibble(
+  Season = 1:9,
+  Year = 2011:2019,
+  Viewers = c(3.47, 3.55, 2.99, 2.27, 2.28, 1.49, 1.36, 1.16, 0.99)
+)
+```
+
+# Viewership Data
+
+```{r}
+ggplot(viewership, aes(x = Year, y = Viewers)) +
+  geom_line(color = "#2C3E50", size = 1.2) +
+  geom_point(size = 3, color = "#E74C3C") +
+  labs(title = "Average US Viewership by Season",
+       x = "Year",
+       y = "Viewers (in millions)") +
+  theme_minimal()
+```
+
+# Change in Viewership
+
+```{r}
+viewership <- viewership %>%
+  mutate(Change = Viewers - lag(Viewers))
+
+ggplot(viewership[-1, ], aes(x = Year, y = Change)) +
+  geom_col(fill = "#3498DB") +
+  labs(title = "Change in Viewership from Previous Season",
+       x = "Year",
+       y = "Change in Viewers (Millions)") +
+  theme_minimal()
+```
+
+:::
