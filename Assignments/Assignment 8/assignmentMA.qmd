@@ -1,0 +1,75 @@
+---
+title: "assignmentMA"
+author: "Gabriel Rogozinski"
+format: html
+editor: visual
+---
+
+# Load required packages
+```{r}
+library(readxl) 
+library(metafor) 
+library(dplyr)
+```
+
+# Read data
+```{r}
+dat <- read_excel("data/metaanalysis_data.xlsx")
+
+# Turn every column name into a valid R identifier
+#   e.g. "Female authors" → "Female.authors", "Neutral toys" → "Neutral.toys"
+names(dat) <- make.names(names(dat))
+```
+
+# Compute effect sizes and prepare moderator
+```{r}
+dat_es <- escalc(
+  measure = "SMD",
+  m1i     = Mean_boys_play_male,  sd1i = SD_boys_play_male,  n1i = N_boys,
+  m2i     = Mean_girls_play_male, sd2i = SD_girls_play_male, n2i = N_girls,
+  data    = dat
+) %>%
+  mutate(
+    author_gender = case_when(
+      Female.authors > Male.authors ~ "female",
+      Female.authors < Male.authors ~ "male",
+      TRUE                          ~ "mixed"
+    )
+  )
+
+```
+
+# Run overall meta-analysis
+```{r}
+res_overall <- rma(yi, vi, data = dat_es, method = "REML")
+print(res_overall)
+```
+
+# Funnel plot
+
+```{r}
+funnel(res_overall, main = "Funnel Plot of Toy-play Effects")
+
+```
+
+# Mod Analysis
+
+```{r}
+# 6a. Study design / quality moderators
+res_methods <- rma(
+  yi, vi,
+  mods   = ~ Neutral.toys + Parent.present + Setting + Country + NOS.score,
+  data   = dat_es,
+  method = "REML"
+)
+print(res_methods)
+
+# 6b. Author-gender moderator
+res_gender <- rma(
+  yi, vi,
+  mods   = ~ author_gender,
+  data   = dat_es,
+  method = "REML"
+)
+print(res_gender)
+```
